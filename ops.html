@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FJMedia — Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0b1120; --navy2: #111827; --navy3: #1e293b;
+    --gold: #c9a84c; --gold-light: #e8c96d;
+    --text: #e2e8f0; --muted: #6b7280; --border: rgba(255,255,255,.08);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+
+  /* Lock screen */
+  #lockScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .lock-card {
+    background: var(--navy2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 40px 36px; width: 100%; max-width: 360px; text-align: center;
+  }
+  .lock-logo {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; color: var(--navy); margin: 0 auto 20px;
+  }
+  .lock-card h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  .lock-card p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .lock-input {
+    width: 100%; background: var(--navy3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text);
+    font-size: 14px; font-family: inherit; outline: none;
+    transition: border-color .2s; margin-bottom: 12px; text-align: center; letter-spacing: 3px;
+  }
+  .lock-input:focus { border-color: rgba(201,168,76,.5); }
+  .lock-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy); font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: opacity .2s;
+  }
+  .lock-btn:hover { opacity: .88; }
+  .lock-err { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; }
+
+  /* Main app */
+  #app { display: none; }
+
+  header {
+    padding: 20px 32px; background: var(--navy2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .h-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: var(--navy);
+  }
+  .header-logo span { font-weight: 600; font-size: 15px; }
+  .header-sub { color: var(--muted); font-size: 12px; }
+  .lock-out { background: none; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; transition: color .2s; }
+  .lock-out:hover { color: var(--text); }
+
+  .app-body { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 32px; background: var(--navy2); border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
+  .tab-btn {
+    flex: 1; padding: 10px 16px; border-radius: 8px; border: none; background: none;
+    color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: background .2s, color .2s; text-align: center;
+  }
+  .tab-btn.on { background: var(--navy3); color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.on { display: block; }
+
+  /* Form */
+  .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 680px) { .panel-grid { grid-template-columns: 1fr; } }
+
+  .form-col h3 { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  input, textarea, select {
+    width: 100%; background: var(--navy3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 13px; color: var(--text);
+    font-size: 13px; font-family: inherit; outline: none; transition: border-color .2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: rgba(201,168,76,.45); }
+  input::placeholder, textarea::placeholder { color: #374151; }
+  select option { background: var(--navy2); }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .gen-btn {
+    width: 100%; padding: 13px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy); font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: opacity .2s, transform .15s;
+    margin-top: 4px;
+  }
+  .gen-btn:hover { opacity: .88; transform: translateY(-1px); }
+  .gen-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* Output */
+  .output-col h3 { font-size: 15px; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 5px 12px; border-radius: 7px; font-size: 11px; cursor: pointer;
+    font-family: inherit; transition: color .2s, border-color .2s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--gold); }
+  .copy-btn.copied { color: #22c55e; border-color: rgba(34,197,94,.4); }
+
+  .output-box {
+    background: var(--navy3); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; font-size: 13px; line-height: 1.7; color: var(--text);
+    min-height: 300px; white-space: pre-wrap; word-break: break-word;
+  }
+  .output-placeholder { color: var(--muted); font-style: italic; }
+
+  .spinner-inline {
+    display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(11,17,32,.3);
+    border-top-color: var(--navy); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Bold markdown */
+  .output-box strong { font-weight: 700; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- Lock Screen -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-logo">FJ</div>
+    <h2>FJMedia Ops</h2>
+    <p>Internal tools. Enter your password to continue.</p>
+    <input type="password" class="lock-input" id="passInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="lock-btn" onclick="unlock()">Enter</button>
+    <div class="lock-err" id="lockErr">Wrong password.</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <header>
+    <div class="header-logo">
+      <div class="h-logo">FJ</div>
+      <div>
+        <div><span>FJMedia Ops</span></div>
+        <div class="header-sub">Internal tools — James only</div>
+      </div>
+    </div>
+    <button class="lock-out" onclick="lockApp()">Lock</button>
+  </header>
+
+  <div class="app-body">
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="quote">Quote</button>
+      <button class="tab-btn" data-tab="proposal">Proposal</button>
+      <button class="tab-btn" data-tab="followup">Follow-Up Sequence</button>
+    </div>
+
+    <!-- Quote Tab -->
+    <div class="tab-panel on" id="tab-quote">
+      <div class="panel-grid">
+        <div class="form-col">
+          <h3>Client Info</h3>
+          <div class="field"><label>Client First Name</label><input type="text" id="q-name" placeholder="Crystal"></div>
+          <div class="field"><label>Business Name</label><input type="text" id="q-biz" placeholder="Fresh Start Cleaning"></div>
+          <div class="field"><label>Industry</label><input type="text" id="q-industry" placeholder="Cleaning & Organizing"></div>
+          <div class="field">
+            <label>Package</label>
+            <select id="q-pkg">
+              <option>Get Found — $600</option>
+              <option>Get Customers — $1,000</option>
+              <option>Own the Market — $1,600</option>
+              <option>Event Site — $300</option>
+              <option>Custom Linktree — $300</option>
+              <option>Monthly Maintenance — from $150/mo</option>
+            </select>
+          </div>
+          <div class="field"><label>Notes (optional)</label><textarea id="q-notes" placeholder="Anything specific to mention — e.g. they asked about the no-upfront model, they have a competitor site to beat, etc."></textarea></div>
+          <button class="gen-btn" id="q-btn" onclick="generate('quote')">Generate Quote</button>
+        </div>
+        <div class="output-col">
+          <h3>Output <button class="copy-btn" id="q-copy" onclick="copyOutput('quote')">Copy</button></h3>
+          <div class="output-box" id="q-output"><span class="output-placeholder">Your generated quote will appear here...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal Tab -->
+    <div class="tab-panel" id="tab-proposal">
+      <div class="panel-grid">
+        <div class="form-col">
+          <h3>Client Info</h3>
+          <div class="field"><label>Client First Name</label><input type="text" id="p-name" placeholder="Crystal"></div>
+          <div class="field"><label>Business Name</label><input type="text" id="p-biz" placeholder="Fresh Start Cleaning"></div>
+          <div class="field"><label>Industry</label><input type="text" id="p-industry" placeholder="Cleaning & Organizing"></div>
+          <div class="field">
+            <label>Package</label>
+            <select id="p-pkg">
+              <option>Get Found — $600</option>
+              <option>Get Customers — $1,000</option>
+              <option>Own the Market — $1,600</option>
+              <option>Event Site — $300</option>
+              <option>Custom Linktree — $300</option>
+            </select>
+          </div>
+          <div class="field"><label>Notes (optional)</label><textarea id="p-notes" placeholder="Key selling points, competitor context, what the client cares about most..."></textarea></div>
+          <button class="gen-btn" id="p-btn" onclick="generate('proposal')">Generate Proposal</button>
+        </div>
+        <div class="output-col">
+          <h3>Output <button class="copy-btn" id="p-copy" onclick="copyOutput('proposal')">Copy</button></h3>
+          <div class="output-box" id="p-output"><span class="output-placeholder">Your generated proposal will appear here...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow-Up Tab -->
+    <div class="tab-panel" id="tab-followup">
+      <div class="panel-grid">
+        <div class="form-col">
+          <h3>Client Info</h3>
+          <div class="field"><label>Client First Name</label><input type="text" id="f-name" placeholder="Crystal"></div>
+          <div class="field"><label>Business Name</label><input type="text" id="f-biz" placeholder="Fresh Start Cleaning"></div>
+          <div class="field"><label>Last Contact</label><input type="text" id="f-last" placeholder="e.g. sent quote 3 days ago, met at farmers market"></div>
+          <div class="field"><label>Context / Notes</label><textarea id="f-notes" placeholder="What did you discuss? What was their hesitation? What are they interested in?"></textarea></div>
+          <button class="gen-btn" id="f-btn" onclick="generate('followup')">Generate Follow-Up Sequence</button>
+        </div>
+        <div class="output-col">
+          <h3>Output <button class="copy-btn" id="f-copy" onclick="copyOutput('followup')">Copy</button></h3>
+          <div class="output-box" id="f-output"><span class="output-placeholder">Your 3-message follow-up sequence will appear here...</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_URL = 'https://fjmedia-ai.vercel.app/api/ops';
+  const PASS = 'fjmedia2026'; // Change this to whatever you want
+
+  function unlock() {
+    const val = document.getElementById('passInput').value;
+    if (val === PASS) {
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('lockErr').style.display = 'none';
+      sessionStorage.setItem('fjops', '1');
+    } else {
+      document.getElementById('lockErr').style.display = 'block';
+      document.getElementById('passInput').value = '';
+      document.getElementById('passInput').focus();
+    }
+  }
+
+  function lockApp() {
+    sessionStorage.removeItem('fjops');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'flex';
+    document.getElementById('passInput').value = '';
+  }
+
+  // Stay unlocked on refresh during same session
+  if (sessionStorage.getItem('fjops')) {
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('on');
+    });
+  });
+
+  function renderMarkdown(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function generate(type) {
+    const btn = document.getElementById(type[0] + '-btn');
+    const output = document.getElementById(type[0] + '-output');
+
+    let data = {};
+    if (type === 'quote') {
+      data = {
+        clientName: document.getElementById('q-name').value.trim(),
+        businessName: document.getElementById('q-biz').value.trim(),
+        industry: document.getElementById('q-industry').value.trim(),
+        package: document.getElementById('q-pkg').value,
+        notes: document.getElementById('q-notes').value.trim()
+      };
+    } else if (type === 'proposal') {
+      data = {
+        clientName: document.getElementById('p-name').value.trim(),
+        businessName: document.getElementById('p-biz').value.trim(),
+        industry: document.getElementById('p-industry').value.trim(),
+        package: document.getElementById('p-pkg').value,
+        notes: document.getElementById('p-notes').value.trim()
+      };
+    } else {
+      data = {
+        clientName: document.getElementById('f-name').value.trim(),
+        businessName: document.getElementById('f-biz').value.trim(),
+        lastContact: document.getElementById('f-last').value.trim(),
+        notes: document.getElementById('f-notes').value.trim()
+      };
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-inline"></span>Generating...';
+    output.innerHTML = '<span class="output-placeholder">Writing...</span>';
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, data })
+      });
+      const result = await res.json();
+      if (result.output) {
+        output.innerHTML = renderMarkdown(result.output);
+      } else {
+        output.innerHTML = '<span class="output-placeholder">Error: ' + (result.error || 'Unknown') + '</span>';
+      }
+    } catch {
+      output.innerHTML = '<span class="output-placeholder">Connection error. Try again.</span>';
+    }
+
+    btn.disabled = false;
+    btn.textContent = type === 'quote' ? 'Generate Quote' : type === 'proposal' ? 'Generate Proposal' : 'Generate Follow-Up Sequence';
+  }
+
+  function copyOutput(type) {
+    const output = document.getElementById(type[0] + '-output');
+    const copyBtn = document.getElementById(type[0] + '-copy');
+    const text = output.innerText;
+    if (!text || text.includes('will appear here')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
