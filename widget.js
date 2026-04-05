@@ -8,7 +8,7 @@
  */
 
 (function () {
-  const API_URL = 'https://fjmedia-ai.vercel.app/api/chat'; // Update with your real Vercel URL after deploy
+  const API_URL = 'https://fjmedia-ai.vercel.app/api/chat';
 
   // --- Styles ---
   const style = document.createElement('style');
