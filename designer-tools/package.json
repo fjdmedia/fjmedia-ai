@@ -1,0 +1,16 @@
+{
+  "name": "designer-tools",
+  "version": "1.0.0",
+  "description": "MCP server providing design analysis tools for FJMedia Super Saiyan Designer AI",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0",
+    "lighthouse": "^12.6.0",
+    "puppeteer": "^24.9.0"
+  }
+}
